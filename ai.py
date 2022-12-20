@@ -1,13 +1,14 @@
+# imports
 import speech_recognition as speech
 import pyttsx3
 from chatgpt_wrapper import ChatGPT
 
+# apis
 bot = ChatGPT()
-
 speech_engine = pyttsx3.init()
-KEYWORD = "jarvis"
-
 RECOGNIZER = speech.Recognizer()
+
+KEYWORD = "jarvis"
 
 def main():
     
@@ -26,8 +27,10 @@ def main():
             print(say)
             speak(say) # speak it
             
+        # keep looping
         result = listen().lower()
     
+    # stop or an error
     print("Stopping...")    
         
 def listen():
@@ -51,6 +54,7 @@ def listen():
         return result
     
 def speak(phrase):
+    
     # simply just say and continue
     speech_engine.say(phrase)
     speech_engine.runAndWait()
