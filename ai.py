@@ -1,10 +1,10 @@
-from playsound import playsound
 import speech_recognition as speech
-from gtts import gTTS
-import os
+import pyttsx3
+from chatgpt_wrapper import ChatGPT
 
-FILE_NAME = "speech"
-file_num = 1
+bot = ChatGPT()
+
+speech_engine = pyttsx3.init()
 KEYWORD = "jarvis"
 
 RECOGNIZER = speech.Recognizer()
@@ -13,50 +13,47 @@ def main():
     
     result = listen().lower()
     
+    # go until stopped
     while "stop" not in result:
         
+        # if in result, we run the bot
         if KEYWORD in result:
-            say = result
+            print("You said \"" + result + "\"")
+            print("Thinking...")
             
-            if "are you there" in result:
-                say = "yes I am"
-            
-            speak(say.replace(KEYWORD, ''))
+            result = result.replace(KEYWORD, '')
+            say = bot.ask(result) # get from chatGPT
+            print(say)
+            speak(say) # speak it
             
         result = listen().lower()
-        
+    
+    print("Stopping...")    
         
 def listen():
     
     result = "stop"
     
+    # Get from mic source
     with speech.Microphone() as source:
+        RECOGNIZER.adjust_for_ambient_noise(source)
+        
+        # let user know
+        print("Listening!")
         audio = RECOGNIZER.listen(source)
         
-    try:
-        result = RECOGNIZER.recognize_google(audio)
-    except speech.UnknownValueError:
-        print("Speech Recognition could not understand audio")
-    except TypeError:
-        print("Type error")
-        
-    return result
-
+        # catch unrecognized input
+        try:
+            result = RECOGNIZER.recognize_google(audio)
+        except speech.UnknownValueError:
+            print("Error: Unknown value")
+            
+        return result
+    
 def speak(phrase):
-    global file_num
-    
-    new_name = FILE_NAME + str(file_num) + ".mp3"
-    
-    text_to_speech = gTTS(phrase)
-    text_to_speech.save(new_name)
-    
-    try:
-        playsound(new_name)
-    except FileNotFoundError:
-        print("Failed to play audio '" + new_name + "'")
-        
-    os.remove(new_name)
-    file_num += 1
+    # simply just say and continue
+    speech_engine.say(phrase)
+    speech_engine.runAndWait()
     
 if __name__ == "__main__":
     main()
